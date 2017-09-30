@@ -12,7 +12,6 @@ services:
     volumes:
       - 'redisdata:/data'
   celery_worker:
-    container_name: 'celery_worker'
     build:
       context: "./src"
     command: "sh ./run_celery.sh"
