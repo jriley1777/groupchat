@@ -1,0 +1,54 @@
+
+version: '3'
+
+services:
+  db:
+    image: postgres
+  redis:
+    container_name: 'redis'
+    image: 'redis:3.2.0'
+    ports:
+      - '127.0.0.1:6379:6379'
+    volumes:
+      - 'redisdata:/data'
+  celery_worker:
+    container_name: 'celery_worker'
+    build:
+      context: "./src"
+    command: "sh ./run_celery.sh"
+    depends_on:
+      - db
+      - redis
+  celery_beat:
+    container_name: 'celery_beat'
+    build:
+      context: "./src"
+    command: "sh ./run_celery_beat.sh"
+    depends_on:
+      - celery_worker
+  celery_flower:
+    container_name: 'celery_flower'
+    build:
+      context: "./src"
+    ports:
+      - "7001:7001"
+    command: "sh ./run_flower.sh"
+    depends_on:
+      - celery_beat
+  web:
+    container_name: 'web'
+    build: "./src"
+    command: "gunicorn control_room.wsgi -w 3 -b :8000"
+    ports:
+      - "8000:8000"
+    volumes:
+     - ./src:/src
+    depends_on:
+      - db
+      - redis
+      - celery_worker
+      - celery_beat
+      - celery_flower
+
+volumes:
+  redisdata:
