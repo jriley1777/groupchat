@@ -3,6 +3,10 @@ This is a real time chat application using django and django-channels.
 
 It uses a stack of postgres, redis, celery, django, flower, and celery beat.
 
+Build and run with docker http://www.docker.com
+
+**Current code assumes docker for mac and local install on mac.  Setting db change required for remote/Linux install/build.
+
 Restart and rebuild
 `docker-compose build && docker-compose up -d`
 
