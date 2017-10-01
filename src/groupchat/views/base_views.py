@@ -15,6 +15,11 @@ def list_rooms(request):
 	data = list(rooms)
 	return JsonResponse(data,safe=False)
 
+def list_friends(request):
+	user = User.objects.values('id','username').exclude(username=request.user).order_by('id')
+	data = list(user)
+	return JsonResponse(data,safe=False)
+
 def get_room_messages(request, room_id):
 	messages = RoomMessage.objects.values('message_time','user__username','content').filter(room=room_id).order_by('message_time')
 	data = list(messages)

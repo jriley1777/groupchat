@@ -8,72 +8,72 @@
             color: lime;
             font-family: 'Inconsolata', monospace;
         }
-        .shell-input {
-            background-color:black;
-            color: lime;
-            font-family: 'Inconsolata', monospace;
-            border: none !important;
-            width: 70%;
-        }
-        .shell-input:focus {
-            outline: none !important;
-        }
         .header {
             border: solid 1px lime;
-            height: 5vh;
+            height: 5%;
             outline: none;
-            border-color: lime;
+            border-color: lightblue;
             box-shadow: 0 0 10px lime;
+            overflow: scroll;
         }
         .footer {
             border: solid 1px lime;
-            height: 5vh;
+            height: 5%;
             outline: none;
-            border-color: lime;
+            border-color: lightblue;
             box-shadow: 0 0 10px lime;
+            overflow: scroll;
         }
         .sidebar {
             border: solid 1px lime;
-            height: 75vh;
-            overflow: scroll;
+            height: 70%;
             outline: none;
-            border-color: lime;
+            border-color: lightblue;
             box-shadow: 0 0 10px lime;
+            overflow: scroll;
         }
         p {
             margin-bottom: 1px;
             overflow-x:hidden;
         }
         .sidebar p:hover {
-            color: red;
+            color: purple;
             cursor: pointer;
         }
         .content {
             border: solid 1px lime;
-            height: 75vh;
+            height: 70%;
             outline: none;
-            border-color: lime;
+            border-color: lightblue;
             box-shadow: 0 0 10px lime;
+            overflow:scroll;
         }
         .content-header {
             border: solid 1px lime;
-            height: 2em;
             outline: none;
-            border-color: lime;
+            height: 5%;
+            border-color: lightblue;
             box-shadow: 0 0 10px lime;
+            overflow: scroll;
+            margin-top:15px;
+            margin-bottom:5px;
         }
         .content-log {
             border: solid 1px lime;
-            height: 55vh;
+            height: 80%;
             outline: none;
-            border-color: lime;
+            border-color: lightblue;
             box-shadow: 0 0 10px lime;
+            overflow: scroll;
+            margin-bottom:5px;
         }
         .content-shell {
             border: solid 1px lime;
-            line-height:2em;
             outline: none;
-            border-color: lime;
+            height: 5%;
+            color: black;
+            background-color:lightgrey;
+            border-color: lightblue;
             box-shadow: 0 0 10px lime;
         }
         .blinker {
@@ -86,6 +86,19 @@
         contenteditable:focus {
             outline: 0px solid transparent;
             border: none;
+        }
+        .shell-input {
+            background-color:lightgrey;
+            height: 5%;
+            color: black;
+            font-family: 'Inconsolata', monospace;
+            border: none !important;
+            width: 70%;
+            overflow: scroll;
+            margin-bottom:5px;
+        }
+        .shell-input:focus {
+            outline: none !important;
         }
         .shell-start {
             display:inline
@@ -117,25 +130,17 @@
                 <div class="col-md-12 room-list">
                 </div>
                 <p>friends</p>
-                <div class="col-md-12">
-                    <p>>:)Friend1</p>
-                    <p>>:)Friend2</p>
-                    <p>>:)Friend3</p>
-                    <p>>:)Friend4</p>
-                    <p>...more</p>
+                <div class="col-md-12 friend-list">
                 </div>
             </div>
         </div>
         <div class="col-10">
             <div class="content col-12">
-                <br>
                 <div class="content-header">
                     <p id="current_room" data-id="1">&nbsp;&nbsp;all_users.</p>
                 </div>
-                <br>
                 <div class="content-log">
                 </div>
-                <br>
                 <div class="content-shell">
                     <p class="shell-start">&nbsp;&nbsp;{{user.username}}>$:&nbsp;&nbsp;</p>
                     <input class="shell-input" name="msg-content"></input>
@@ -188,6 +193,14 @@
             }
         });
     }
+    function get_friendlist(){
+        $(".friend-list").empty();
+        var room_messages = $.get("/friend/list", function(data){
+            for(i in data){
+                $(".friend-list").append('<p class="friend" data-id=' + data[i].id + '&nbsp;&nbsp;>' + data[i].username + '</p>');
+            }
+        });
+    }
     function switch_room(){
         $(".room").on("click",function(){
             room_id = $(this).data("data-id");
@@ -213,6 +226,7 @@
             $(".shell-input").val("");
         });
     }
+    get_friendlist();
     get_roomlist();
     get_messages(1);
 </script>
