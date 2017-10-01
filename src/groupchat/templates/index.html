@@ -13,6 +13,7 @@
             color: lime;
             font-family: 'Inconsolata', monospace;
             border: none !important;
+            width: 70%;
         }
         .shell-input:focus {
             outline: none !important;
@@ -20,15 +21,28 @@
         .header {
             border: solid 1px lime;
             height: 5vh;
+            outline: none;
+            border-color: lime;
+            box-shadow: 0 0 10px lime;
         }
         .footer {
             border: solid 1px lime;
             height: 5vh;
+            outline: none;
+            border-color: lime;
+            box-shadow: 0 0 10px lime;
         }
         .sidebar {
             border: solid 1px lime;
             height: 75vh;
             overflow: scroll;
+            outline: none;
+            border-color: lime;
+            box-shadow: 0 0 10px lime;
+        }
+        p {
+            margin-bottom: 1px;
+            overflow-x:hidden;
         }
         .sidebar p:hover {
             color: red;
@@ -37,18 +51,30 @@
         .content {
             border: solid 1px lime;
             height: 75vh;
+            outline: none;
+            border-color: lime;
+            box-shadow: 0 0 10px lime;
         }
         .content-header {
             border: solid 1px lime;
             height: 2em;
+            outline: none;
+            border-color: lime;
+            box-shadow: 0 0 10px lime;
         }
         .content-log {
             border: solid 1px lime;
             height: 55vh;
+            outline: none;
+            border-color: lime;
+            box-shadow: 0 0 10px lime;
         }
         .content-shell {
             border: solid 1px lime;
             line-height:2em;
+            outline: none;
+            border-color: lime;
+            box-shadow: 0 0 10px lime;
         }
         .blinker {
             animation-name: blinker;
@@ -88,12 +114,7 @@
                 <br>
                 <p>help</p>
                 <p>rooms</p>
-                <div class="col-md-12">
-                    <p>>all_users.</p>
-                    <p>>Room2</p>
-                    <p>>Room3</p>
-                    <p>>Room4</p>
-                    <p>...more</p>
+                <div class="col-md-12 room-list">
                 </div>
                 <p>friends</p>
                 <div class="col-md-12">
@@ -109,17 +130,15 @@
             <div class="content col-12">
                 <br>
                 <div class="content-header">
-                    <p>&nbsp;&nbsp;room:&nbsp;&nbsp;all_users.</p>
+                    <p id="current_room" data-id="1">&nbsp;&nbsp;all_users.</p>
                 </div>
                 <br>
                 <div class="content-log">
-                    <p class="shell-start" style="display:inline">&nbsp;&nbsp;{{user.username}}>$:&nbsp;&nbsp;</p>
-                    <p class="shell-contents">Hello.</p>
                 </div>
                 <br>
                 <div class="content-shell">
                     <p class="shell-start">&nbsp;&nbsp;{{user.username}}>$:&nbsp;&nbsp;</p>
-                    <input class="shell-input"></input>
+                    <input class="shell-input" name="msg-content"></input>
                 </div>
             </div>
         </div>
@@ -134,7 +153,69 @@
         </div>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function() {
+      $('.shell-input').keydown(function(event) {
+        // enter has keyCode = 13, change it if you want to use another button
+        if (event.keyCode == 13) {
+          add_message();
+          return false;
+        }
+      });
+      $(".room").on("click",function(){
+        room_id = $(this).data("id").trim();
+        console.log(room_id);
+        room_name = $(this).html();
+        $("#current_room").empty();
+        $("#current_room").html("&nbsp;&nbsp;" + room_name);
+        $("#current_room").attr("data-id",room_id);
+        get_messages(room_id);
+      });
+    });
+    function get_current_room_id(){
+        room_id = $("#current_room").data("id");
+        return room_id;
+    }
+    function get_roomlist(){
+        $(".room-list").empty();
+        var room_messages = $.get("/room/list", function(data){
+            for(i in data){
+                $(".room-list").append('<p class="room" data-id=' + data[i].id + '&nbsp;&nbsp;>' + data[i].name + '</p>');
+            }
+        });
+    }
+    function switch_room(){
+        $(".room").on("click",function(){
+            room_id = $(this).data("data-id");
+            room_name = $(this).val();
+            $("#current_room").val("&nbsp;&nbsp;" + room_name);
+            get_messages(room_id);
+        });
+    }
+    function get_messages(room_id){
+        $(".content-log").empty();
+        var room_messages = $.get("/room/" + room_id + "/get_messages", function(data){
+            for(i in data){
+                $(".content-log").append('<p class="msg">&nbsp;&nbsp;' + data[i].user__username + '>$:&nbsp;&nbsp;' + data[i].content + '</p>');
+            }
+        });
+    }
+    function add_message(){
+        room_id = get_current_room_id();
+        content = $(".shell-input").val();
+        $.get("/room/" + room_id + "/message/add",{'msg':content})
+        .done(function(){
+            get_messages(room_id);
+            $(".shell-input").val("");
+        });
+    }
+    get_roomlist();
+    get_messages(1);
+</script>
 </body>
 </html>
