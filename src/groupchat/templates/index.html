@@ -1,9 +1,140 @@
 <html>
 <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+    <style>
+        body {
+            background-color:black;
+            color: lime;
+            font-family: 'Inconsolata', monospace;
+        }
+        .shell-input {
+            background-color:black;
+            color: lime;
+            font-family: 'Inconsolata', monospace;
+            border: none !important;
+        }
+        .shell-input:focus {
+            outline: none !important;
+        }
+        .header {
+            border: solid 1px lime;
+            height: 5vh;
+        }
+        .footer {
+            border: solid 1px lime;
+            height: 5vh;
+        }
+        .sidebar {
+            border: solid 1px lime;
+            height: 75vh;
+            overflow: scroll;
+        }
+        .sidebar p:hover {
+            color: red;
+            cursor: pointer;
+        }
+        .content {
+            border: solid 1px lime;
+            height: 75vh;
+        }
+        .content-header {
+            border: solid 1px lime;
+            height: 2em;
+        }
+        .content-log {
+            border: solid 1px lime;
+            height: 55vh;
+        }
+        .content-shell {
+            border: solid 1px lime;
+            line-height:2em;
+        }
+        .blinker {
+            animation-name: blinker;
+            animation-iteration-count: infinite;
+        }
+        .editor {
+            border: solid 1px lime;
+        }
+        contenteditable:focus {
+            outline: 0px solid transparent;
+            border: none;
+        }
+        .shell-start {
+            display:inline
+        }
+        .shell-contents {
+            display:inline
+        }
+
+    </style>
 </head>
 <body>
-<div>
-    <h1>Hello {{user.username}}!</h1>
+<br>
+<div class="container-fluid">
+    <div class="header row-fluid">
+        <div class="col-md-12">
+            groupchat.
+            <span class="pull-right">user.</span>
+        </div>
+    </div>
 </div>
+<br>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-2">
+            <div class="sidebar col-12">
+                <br>
+                <p>help</p>
+                <p>rooms</p>
+                <div class="col-md-12">
+                    <p>>all_users.</p>
+                    <p>>Room2</p>
+                    <p>>Room3</p>
+                    <p>>Room4</p>
+                    <p>...more</p>
+                </div>
+                <p>friends</p>
+                <div class="col-md-12">
+                    <p>>:)Friend1</p>
+                    <p>>:)Friend2</p>
+                    <p>>:)Friend3</p>
+                    <p>>:)Friend4</p>
+                    <p>...more</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-10">
+            <div class="content col-12">
+                <br>
+                <div class="content-header">
+                    <p>&nbsp;&nbsp;room:&nbsp;&nbsp;all_users.</p>
+                </div>
+                <br>
+                <div class="content-log">
+                    <p class="shell-start" style="display:inline">&nbsp;&nbsp;{{user.username}}>$:&nbsp;&nbsp;</p>
+                    <p class="shell-contents">Hello.</p>
+                </div>
+                <br>
+                <div class="content-shell">
+                    <p class="shell-start">&nbsp;&nbsp;{{user.username}}>$:&nbsp;&nbsp;</p>
+                    <input class="shell-input"></input>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<div class="container-fluid">
+    <div class="footer row-fluid">
+        <div class="col-md-12">
+            copyright. 2017
+            <span class="pull-right">joseph riley.</span>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
 </body>
 </html>
