@@ -56,7 +56,7 @@
             box-shadow: 0 0 10px lime;
             overflow: scroll;
             margin-top:15px;
-            margin-bottom:5px;
+            margin-bottom:10px;
         }
         .content-log {
             border: solid 1px lime;
@@ -65,7 +65,7 @@
             border-color: lightblue;
             box-shadow: 0 0 10px lime;
             overflow: scroll;
-            margin-bottom:5px;
+            margin-bottom:10px;
         }
         .content-shell {
             border: solid 1px lime;
@@ -89,7 +89,7 @@
         }
         .shell-input {
             background-color:lightgrey;
-            height: 5%;
+            height:100%;
             color: black;
             font-family: 'Inconsolata', monospace;
             border: none !important;
@@ -121,6 +121,7 @@
 </div>
 <br>
 <div class="container-fluid">
+    {% csrf_token %}
     <div class="row">
         <div class="col-2">
             <div class="sidebar col-12">
@@ -176,7 +177,7 @@
       $('.shell-input').keydown(function(event) {
         // enter has keyCode = 13, change it if you want to use another button
         if (event.keyCode == 13) {
-          add_message();
+          command_handler();
           return false;
         }
       });
@@ -213,8 +214,95 @@
         $(".content-log").empty();
         var room_messages = $.get("/room/" + room_id + "/get_messages", function(data){
             for(i in data){
-                $(".content-log").append('<p class="msg">&nbsp;&nbsp;' + data[i].user__username + '>$:&nbsp;&nbsp;' + data[i].content + '</p>');
+                var content = data[i].content;
+                if(content.includes(".jpg") || content.includes(".png")){
+                    $(".content-log").append('<p class="msg">&nbsp;&nbsp;' + data[i].user__username + '>$:&nbsp;&nbsp;' + '<img src="' + content + '" height="100">');
+                } else {
+                    $(".content-log").append('<p class="msg">&nbsp;&nbsp;' + data[i].user__username + '>$:&nbsp;&nbsp;' + data[i].content + '</p>');
+                }
             }
+        });
+    }
+    function command_handler(){
+        msg = $(".shell-input").val();
+        if(msg.startsWith(":")){
+            command(msg);
+        } else {
+            add_message();
+        }
+    }
+    function command(msg){
+        if(msg.startsWith(":switch_rooms")){
+            room_to_try = msg.split(":switch_rooms")[1].trim();
+            switch_room
+        } else if(msg.startsWith(":css")){
+            parsed = msg.split(":css")[1].trim();
+            elem = parsed.split(" ")[0].trim();
+            attr = parsed.split(" ")[1].trim();
+            style = parsed.split(" ")[2].trim();
+            $(elem).css(attr,style);
+        } else if(msg.startsWith(":meow")){
+            $(".content-log").append('<img src="http://thecatapi.com/api/images/get?format=src&type=gif">');
+        } else if(msg.startsWith(":doge")){
+            $.get("https://dog.ceo/api/breed/shiba/images/random",function(data){
+                console.log(data);
+                add_custom_message(data.message);
+            })
+        } else if(msg.startsWith(":crypto")){
+            parsed = msg.split(":crypto")[1].trim();
+            $.get("https://min-api.cryptocompare.com/data/price?fsym=" + parsed + "&tsyms=USD",function(data){
+                price = data.USD
+                add_custom_message("The current price for " + parsed + " is:  " + price);
+            });
+        } else if(msg.startsWith(":sup")){
+            add_custom_message("WASSSSSUPPPPPPPP");
+        } else if(msg.startsWith(":premier-league")){
+            $.get("http://api.football-data.org/v1/competitions/445/leagueTable",function(data){
+                for(i in data){
+                    $(".content-log").append('<p class="msg">&nbsp;&nbsp;' + data[i].user__username + '>$:&nbsp;&nbsp;' + data[i].teamName + ' - position: ' + data[i].position + '</p>');
+                }
+            })
+        } else if(msg.startsWith(":swanson")){
+            $.get("http://ron-swanson-quotes.herokuapp.com/v2/quotes", function(data){
+                add_custom_message("Swanson:  " + data);
+            })
+        } else if(msg.startsWith(":deckofcards")){
+            $.get("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1",function(data){
+                add_custom_message("A new deck has been created:  " + data.deck_id);
+            });
+        } else if(msg.startsWith(":drawcard")){
+            parsed = msg.split(":drawcard")[1].trim();
+            num_cards = parsed.split(" ")[0].trim();
+            deck_id = parsed.split(" ")[1].trim();
+            $.get("https://deckofcardsapi.com/api/deck/" + deck_id + "/draw/?count=" + num_cards,function(data){
+                var cards = [];
+                for( i in data.cards){
+                    cards.push(data.cards[i].code);
+                }
+                add_custom_message(cards.join("-"));
+            });
+        } else if(msg.startsWith(":weather")){
+            city = msg.split(":weather")[1].trim();
+            $.get("https://www.metaweather.com/api/location/search/?query=" + city, function(data){
+                $.get("https://www.metaweather.com/api/location/" + data.woeid, function(data){
+                    desc = data.consolidated_weather[0].weather_state_name;
+                    add_custom_message("The weather in " + city + " is " + desc);
+                })
+            })
+        }
+
+
+        else {
+            add_message();
+        }
+    }
+    function add_custom_message(msg){
+        room_id = get_current_room_id();
+        content = msg;
+        $.get("/room/" + room_id + "/message/add",{'msg':content})
+        .done(function(){
+            get_messages(room_id);
+            $(".shell-input").val("");
         });
     }
     function add_message(){
