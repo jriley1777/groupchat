@@ -160,21 +160,20 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
 <script>
     $(document).ready(function() {
+      $(".room").on("click",function(){
+        room_id = $(this).data("id").trim();
+        room_name = $(this).html();
+        $("#current_room").empty();
+        $("#current_room").html("&nbsp;&nbsp;" + room_name);
+        $("#current_room").data("id",room_id);
+        get_messages(room_id);
+      });
       $('.shell-input').keydown(function(event) {
         // enter has keyCode = 13, change it if you want to use another button
         if (event.keyCode == 13) {
           add_message();
           return false;
         }
-      });
-      $(".room").on("click",function(){
-        room_id = $(this).data("id").trim();
-        console.log(room_id);
-        room_name = $(this).html();
-        $("#current_room").empty();
-        $("#current_room").html("&nbsp;&nbsp;" + room_name);
-        $("#current_room").attr("data-id",room_id);
-        get_messages(room_id);
       });
     });
     function get_current_room_id(){
