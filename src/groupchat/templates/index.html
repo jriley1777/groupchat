@@ -36,6 +36,9 @@
             margin-bottom: 1px;
             overflow-x:hidden;
         }
+        .scroll {
+            overflow-y: scroll;
+        }
         .sidebar p:hover {
             color: purple;
             cursor: pointer;
@@ -108,6 +111,7 @@
         }
 
     </style>
+    <title>groupchat.</title>
 </head>
 <body>
 <br>
@@ -158,22 +162,22 @@
             <span class="pull-right">joseph riley.</span>
         </div>
     </div>
+    <div class="row-fluid">
+    {% for message in messages %}
+      <div class="col-md-12 alert">
+          {{ message }}
+      </div>
+    {% endfor %}
+    </div>
 </div>
 <script
   src="https://code.jquery.com/jquery-3.2.1.min.js"
   integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
   crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
 <script>
     $(document).ready(function() {
-      $(".room").on("click",function(){
-        room_id = $(this).data("id").trim();
-        room_name = $(this).html();
-        $("#current_room").empty();
-        $("#current_room").html("&nbsp;&nbsp;" + room_name);
-        $("#current_room").data("id",room_id);
-        get_messages(room_id);
-      });
       $('.shell-input').keydown(function(event) {
         // enter has keyCode = 13, change it if you want to use another button
         if (event.keyCode == 13) {
@@ -182,6 +186,18 @@
         }
       });
     });
+    $(document).on("click",".room",function(){
+        room_id = $(this).data("id");
+        room_name = $(this).html();
+        $("#current_room").empty();
+        $("#current_room").html("&nbsp;&nbsp;" + room_name);
+        $("#current_room").data("id",room_id);
+        get_messages(room_id);
+      });
+    function scrollLog() {
+        var ht = $(".content-log").prop('scrollHeight');
+        $(".content-log").scrollTop(ht);
+    }
     function get_current_room_id(){
         room_id = $("#current_room").data("id");
         return room_id;
@@ -190,7 +206,7 @@
         $(".room-list").empty();
         var room_messages = $.get("/room/list", function(data){
             for(i in data){
-                $(".room-list").append('<p class="room" data-id=' + data[i].id + '&nbsp;&nbsp;>' + data[i].name + '</p>');
+                $(".room-list").append('<p class="room" data-id=' + data[i].id + '>' + data[i].name + '</p>');
             }
         });
     }
@@ -198,7 +214,7 @@
         $(".friend-list").empty();
         var room_messages = $.get("/friend/list", function(data){
             for(i in data){
-                $(".friend-list").append('<p class="friend" data-id=' + data[i].id + '&nbsp;&nbsp;>' + data[i].username + '</p>');
+                $(".friend-list").append('<p class="friend" data-id=' + data[i].id + '>' + data[i].username + '</p>');
             }
         });
     }
@@ -221,15 +237,32 @@
                     $(".content-log").append('<p class="msg">&nbsp;&nbsp;' + data[i].user__username + '>$:&nbsp;&nbsp;' + data[i].content + '</p>');
                 }
             }
+        })
+        .done(function(){
+            scrollLog();
         });
     }
     function command_handler(){
         msg = $(".shell-input").val();
         if(msg.startsWith(":")){
             command(msg);
+            $(".shell-input").val("");
         } else {
             add_message();
+            $(".shell-input").val("");
         }
+    }
+    function create_room(room_name){
+        $.get("/room/create",{'room_name':room_name})
+        .done(function(){
+            get_roomlist();
+        });
+    }
+    function delete_room(room_name){
+        $.get("/room/delete",{'room_name':room_name})
+        .done(function(){
+            get_roomlist();
+        });
     }
     function command(msg){
         if(msg.startsWith(":switch_rooms")){
@@ -241,6 +274,9 @@
             attr = parsed.split(" ")[1].trim();
             style = parsed.split(" ")[2].trim();
             $(elem).css(attr,style);
+        } else if(msg.startsWith(":js")){
+            parsed = msg.split(":js")[1].trim();
+            add_custom_message(parsed + " : " + eval(parsed));
         } else if(msg.startsWith(":meow")){
             $(".content-log").append('<img src="http://thecatapi.com/api/images/get?format=src&type=gif">');
         } else if(msg.startsWith(":doge")){
@@ -249,7 +285,7 @@
                 add_custom_message(data.message);
             })
         } else if(msg.startsWith(":crypto")){
-            parsed = msg.split(":crypto")[1].trim();
+            parsed = msg.split(":crypto")[1].trim().toUpperCase();
             $.get("https://min-api.cryptocompare.com/data/price?fsym=" + parsed + "&tsyms=USD",function(data){
                 price = data.USD
                 add_custom_message("The current price for " + parsed + " is:  " + price);
@@ -289,6 +325,12 @@
                     add_custom_message("The weather in " + city + " is " + desc);
                 })
             })
+        } else if(msg.startsWith(":create-room")){
+            parsed = msg.split(":create-room")[1].trim();
+            create_room(parsed);
+        } else if(msg.startsWith(":delete-room")){
+            parsed = msg.split(":delete-room")[1].trim();
+            delete_room(parsed);
         }
 
 
@@ -302,7 +344,6 @@
         $.get("/room/" + room_id + "/message/add",{'msg':content})
         .done(function(){
             get_messages(room_id);
-            $(".shell-input").val("");
         });
     }
     function add_message(){
@@ -311,7 +352,6 @@
         $.get("/room/" + room_id + "/message/add",{'msg':content})
         .done(function(){
             get_messages(room_id);
-            $(".shell-input").val("");
         });
     }
     get_friendlist();
