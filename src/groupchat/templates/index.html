@@ -119,7 +119,7 @@
     <div class="header row-fluid">
         <div class="col-md-12">
             groupchat.
-            <span class="pull-right">user.</span>
+            <span class="pull-right">v1.</span>
         </div>
     </div>
 </div>
@@ -232,9 +232,9 @@
             for(i in data){
                 var content = data[i].content;
                 if(content.includes(".jpg") || content.includes(".png")){
-                    $(".content-log").append('<p class="msg">&nbsp;&nbsp;' + data[i].user__username + '>$:&nbsp;&nbsp;' + '<img src="' + content + '" height="100">');
+                    $(".content-log").append('<p class="msg">&nbsp;&nbsp;' + data[i].user__username + ':&nbsp;&nbsp;' + '<img src="' + content + '" height="100">');
                 } else {
-                    $(".content-log").append('<p class="msg">&nbsp;&nbsp;' + data[i].user__username + '>$:&nbsp;&nbsp;' + data[i].content + '</p>');
+                    $(".content-log").append('<p class="msg">&nbsp;&nbsp;' + data[i].user__username + ':&nbsp;&nbsp;' + data[i].content + '</p>');
                 }
             }
         })
@@ -274,6 +274,7 @@
             attr = parsed.split(" ")[1].trim();
             style = parsed.split(" ")[2].trim();
             $(elem).css(attr,style);
+            add_custom_message(parsed);
         } else if(msg.startsWith(":js")){
             parsed = msg.split(":js")[1].trim();
             add_custom_message(parsed + " : " + eval(parsed));
